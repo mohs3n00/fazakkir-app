@@ -1,0 +1,12 @@
+<svg width="300" height="300" viewBox="0 0 300 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="150" cy="150" r="145" stroke="#D4AF37" stroke-width="10"/>
+<path d="M150 5 L150 25" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>
+<path d="M150 275 L150 295" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>
+<path d="M5 150 L25 150" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>
+<path d="M275 150 L295 150" stroke="#D4AF37" stroke-width="5" stroke-linecap="round"/>
+<text x="140" y="50" fill="#D4AF37" font-size="24" font-family="Arial" font-weight="bold">N</text>
+<text x="140" y="270" fill="#D4AF37" font-size="24" font-family="Arial" font-weight="bold">S</text>
+<text x="260" y="160" fill="#D4AF37" font-size="24" font-family="Arial" font-weight="bold">E</text>
+<text x="30" y="160" fill="#D4AF37" font-size="24" font-family="Arial" font-weight="bold">W</text>
+<circle cx="150" cy="150" r="130" stroke="#D4AF37" stroke-width="2" stroke-dasharray="10 10"/>
+</svg>

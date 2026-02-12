@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/notification_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="باقي على الصلاة"
+        android:textSize="14sp"
+        android:textColor="#CCFFFFFF"
+        android:gravity="center"
+        android:includeFontPadding="false" />
+
+    <Chronometer
+        android:id="@+id/notification_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="32sp"
+        android:textColor="#FFD700"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:countDown="true"
+        android:includeFontPadding="false"
+        android:layout_marginTop="0dp"
+        android:fontFamily="sans-serif-medium" />
+
+</LinearLayout>

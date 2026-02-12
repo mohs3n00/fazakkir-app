@@ -1,0 +1,27 @@
+[
+    {
+        "category": "Morning Athkar",
+        "items": [
+            {
+                "text": "Allahu Akbar",
+                "count": 33,
+                "reference": "Muslim"
+            },
+            {
+                "text": "Alhamdulillah",
+                "count": 33,
+                "reference": "Muslim"
+            }
+        ]
+    },
+    {
+        "category": "Evening Athkar",
+        "items": [
+            {
+                "text": "SubhanAllah",
+                "count": 33,
+                "reference": "Muslim"
+            }
+        ]
+    }
+]

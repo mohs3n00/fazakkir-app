@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layoutDirection="rtl">
+
+    <!-- Top Section (Same as Collapsed) -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        
+        <!-- Timer (Cyan) - Right in RTL -->
+        <Chronometer
+            android:id="@+id/notification_timer_expanded"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#00BCD4"
+            android:layout_marginEnd="16dp" />
+
+        <!-- Text Container (Left of Timer) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/notification_timer_expanded"
+            android:layout_centerVertical="true"
+            android:orientation="vertical"
+            android:gravity="end">
+
+            <!-- Hijri Date | Location -->
+            <TextView
+                android:id="@+id/notification_header_text_expanded"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="21 شعبان 1447 | الموقع"
+                style="@style/TextAppearance.Compat.Notification.Info"
+                android:singleLine="true" />
+
+            <!-- Prayer Name + Time -->
+            <TextView
+                android:id="@+id/notification_content_text_expanded"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="العصر 03:13 م"
+                style="@style/TextAppearance.Compat.Notification.Title"
+                android:layout_marginTop="2dp" />
+
+        </LinearLayout>
+    </RelativeLayout>
+
+    <!-- Buttons Row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp"
+        android:gravity="center">
+
+        <!-- Refresh Button (TextView) -->
+        <TextView
+            android:id="@+id/notification_btn_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="تحديث الموقع"
+            android:textSize="12sp"
+            style="@style/TextAppearance.Compat.Notification.Info"
+            android:background="@drawable/bg_pill_button"
+            android:layout_marginEnd="8dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <!-- Open Quran Button (TextView) -->
+        <TextView
+            android:id="@+id/notification_btn_open"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="افتح المصحف"
+            android:textSize="12sp"
+            style="@style/TextAppearance.Compat.Notification.Info"
+            android:background="@drawable/bg_pill_button"
+            android:layout_marginStart="8dp"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</LinearLayout>
