@@ -67,6 +67,16 @@ class AdhanRepository {
     await prefs.setString(_storageKey, id);
   }
 
+  Future<bool> isAdhanEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool('is_adhan_enabled') ?? true;
+  }
+
+  Future<void> setAdhanEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('is_adhan_enabled', enabled);
+  }
+
   Future<File?> getMuezzinFile(Muezzin muezzin) async {
     final dir = await getAdhanDirectory();
     final file = File('$dir/${muezzin.fileName}');

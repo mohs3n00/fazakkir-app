@@ -11,6 +11,7 @@ import '../../../../core/utils/date_converter.dart';
 import '../../../services/prayer_times_service.dart';
 import '../../../../core/services/native_scheduler_service.dart';
 import 'package:fazakkir/l10n/app_localizations.dart';
+import '../../../../core/utils/prayer_time_utils.dart';
 
 class HomeHeader extends ConsumerStatefulWidget {
   const HomeHeader({super.key});
@@ -75,6 +76,9 @@ class _HomeHeaderState extends ConsumerState<HomeHeader> {
       // Update if prayer changed OR if it's the first run (last is null)
       // We also check if nextTime changed to update countdown target
       if (nextTime != null) {
+        // Round to next minute for display consistency with Alarm
+        nextTime = PrayerTimeUtils.ceilToMinute(nextTime);
+
         // Always update if we have a valid time
         _lastNextPrayer = next; // Keep track, though less critical now
 
@@ -256,6 +260,11 @@ class _HomeHeaderState extends ConsumerState<HomeHeader> {
                       prayerTimes.calculationParameters,
                     );
                     nextTime = tomorrowPrayerTimes.fajr;
+                  }
+
+                  // Round to next minute for display consistency
+                  if (nextTime != null) {
+                    nextTime = PrayerTimeUtils.ceilToMinute(nextTime);
                   }
 
                   final remaining = nextTime?.difference(_currentTime);

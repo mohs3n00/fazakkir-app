@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import 'package:fazakkir/features/adhan/data/models/muezzin_model.dart';
 import 'package:fazakkir/features/adhan/data/repositories/adhan_repository.dart';
 import 'package:fazakkir/features/adhan/services/adhan_download_service.dart';
+import 'package:fazakkir/features/adhan/services/adhan_scheduling_service.dart';
 import '../../../../l10n/app_localizations.dart';
 
 class AdhanSettingsScreen extends ConsumerStatefulWidget {
@@ -25,6 +26,7 @@ class _AdhanSettingsScreenState extends ConsumerState<AdhanSettingsScreen> {
   String? _playingMuezzinId;
   String _downloadStatus = "";
   bool? _isDownloaded; // Cache the download status
+  bool _isAdhanEnabled = true;
 
   @override
   void initState() {
@@ -48,9 +50,11 @@ class _AdhanSettingsScreenState extends ConsumerState<AdhanSettingsScreen> {
     final muezzin = await ref
         .read(adhanRepositoryProvider)
         .getSelectedMuezzin();
+    final isEnabled = await ref.read(adhanRepositoryProvider).isAdhanEnabled();
     if (mounted) {
       setState(() {
         _selectedMuezzinId = muezzin.id;
+        _isAdhanEnabled = isEnabled;
       });
     }
   }
@@ -153,7 +157,25 @@ class _AdhanSettingsScreenState extends ConsumerState<AdhanSettingsScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.adhanSettingsTitle), centerTitle: true),
+      appBar: AppBar(
+        title: Text(l10n.adhanSettingsTitle),
+        centerTitle: true,
+        actions: [
+          Switch(
+            value: _isAdhanEnabled,
+            onChanged: (value) async {
+              setState(() => _isAdhanEnabled = value);
+              await ref.read(adhanRepositoryProvider).setAdhanEnabled(value);
+              // Trigger scheduling (or cancellation if disabled)
+              await ref
+                  .read(adhanSchedulingServiceProvider)
+                  .scheduleAdhans(force: true);
+            },
+            activeThumbColor: AppColors.islamicGold,
+          ),
+          SizedBox(width: 16.w),
+        ],
+      ),
       body: _isDownloaded == null
           ? const Center(child: CircularProgressIndicator())
           : _isDownloaded!
@@ -280,40 +302,56 @@ class _AdhanSettingsScreenState extends ConsumerState<AdhanSettingsScreen> {
   }
 
   Widget _buildMuezzinList(bool isDark) {
-    return ListView.builder(
-      padding: EdgeInsets.all(16.w),
-      itemCount: Muezzin.allMuezzins.length,
-      itemBuilder: (context, index) {
-        final muezzin = Muezzin.allMuezzins[index];
-        final isSelected = _selectedMuezzinId == muezzin.id;
-        final isPlaying = _playingMuezzinId == muezzin.id;
+    return AbsorbPointer(
+      absorbing: !_isAdhanEnabled,
+      child: Opacity(
+        opacity: _isAdhanEnabled ? 1.0 : 0.5,
+        child: ListView.builder(
+          padding: EdgeInsets.all(16.w),
+          itemCount: Muezzin.allMuezzins.length,
+          itemBuilder: (context, index) {
+            final muezzin = Muezzin.allMuezzins[index];
+            final isSelected = _selectedMuezzinId == muezzin.id;
+            final isPlaying = _playingMuezzinId == muezzin.id;
 
-        return Card(
-          color: isDark ? Colors.white10 : Colors.white,
-          margin: EdgeInsets.only(bottom: 8.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.r),
-            side: isSelected
-                ? BorderSide(color: AppColors.islamicGold, width: 2)
-                : BorderSide.none,
-          ),
-          child: ListTile(
-            leading: IconButton(
-              icon: Icon(isPlaying ? Icons.pause_circle : Icons.play_circle),
-              color: AppColors.islamicGold,
-              onPressed: () => _playPreview(muezzin),
-            ),
-            title: Text(muezzin.name),
-            trailing: isSelected
-                ? Icon(Icons.check_circle, color: AppColors.islamicGold)
-                : null,
-            onTap: () {
-              ref.read(adhanRepositoryProvider).saveSelectedMuezzin(muezzin.id);
-              setState(() => _selectedMuezzinId = muezzin.id);
-            },
-          ),
-        );
-      },
+            return Card(
+              color: isDark ? Colors.white10 : Colors.white,
+              margin: EdgeInsets.only(bottom: 8.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.r),
+                side: isSelected
+                    ? BorderSide(color: AppColors.islamicGold, width: 2)
+                    : BorderSide.none,
+              ),
+              child: ListTile(
+                leading: IconButton(
+                  icon: Icon(
+                    isPlaying ? Icons.pause_circle : Icons.play_circle,
+                  ),
+                  color: AppColors.islamicGold,
+                  onPressed: () => _playPreview(muezzin),
+                ),
+                title: Text(muezzin.name),
+                trailing: isSelected
+                    ? Icon(Icons.check_circle, color: AppColors.islamicGold)
+                    : null,
+                onTap: () async {
+                  await ref
+                      .read(adhanRepositoryProvider)
+                      .saveSelectedMuezzin(muezzin.id);
+                  if (mounted) {
+                    setState(() => _selectedMuezzinId = muezzin.id);
+                  }
+                  // Reschedule to apply new audio path
+                  await ref
+                      .read(adhanSchedulingServiceProvider)
+                      .scheduleAdhans(force: true);
+                },
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

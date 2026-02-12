@@ -5,6 +5,7 @@ import '../../../core/services/native_scheduler_service.dart';
 import '../../../core/providers.dart';
 import '../data/repositories/adhan_repository.dart';
 import '../../../services/prayer_config_service.dart';
+import '../../../core/utils/prayer_time_utils.dart';
 
 final adhanSchedulingServiceProvider = Provider(
   (ref) => AdhanSchedulingService(ref),
@@ -43,6 +44,15 @@ class AdhanSchedulingService {
 
     // Get Audio Path
     final repo = ref.read(adhanRepositoryProvider);
+
+    // Check if Adhan is enabled
+    final isEnabled = await repo.isAdhanEnabled();
+    if (!isEnabled) {
+      // If disabled, cancel all existing adhans and return
+      await cancelAllAdhans();
+      return;
+    }
+
     final muezzin = await repo.getSelectedMuezzin();
     final file = await repo.getMuezzinFile(muezzin);
     final audioPath = (file != null && await file.exists()) ? file.path : null;
@@ -101,13 +111,17 @@ class AdhanSchedulingService {
     };
 
     for (final entry in prayers.entries) {
+      // Use PrayerTimeUtils to align time to the next minute start
+      // This ensures 12:00:01 becomes 12:01:00, matching DateFormat.jm() display
+      final alignedTime = PrayerTimeUtils.ceilToMinute(entry.value);
+
       // Only schedule if time is in future
-      if (entry.value.isAfter(now)) {
+      if (alignedTime.isAfter(now)) {
         // Unique ID: DayOfYear * 10 + PrayerIndex
         // Let's shift Prayers to 10000+.
 
         final dayVal =
-            entry.value.difference(DateTime(entry.value.year, 1, 1)).inDays + 1;
+            alignedTime.difference(DateTime(alignedTime.year, 1, 1)).inDays + 1;
         int alarmId = 10000 + (dayVal * 10) + entry.key.index;
 
         // Hijri Date (approximate or fetch if available)
@@ -118,7 +132,7 @@ class AdhanSchedulingService {
 
         await scheduler.scheduleAdhan(
           id: alarmId,
-          triggerAt: entry.value,
+          triggerAt: alignedTime,
           title: "حان الآن موعد ${formattedNames[entry.key]}",
           body: "حي على الصلاة",
           prayerName: formattedNames[entry.key],
@@ -132,7 +146,8 @@ class AdhanSchedulingService {
         final prefs = ref.read(reminderPreferencesProvider);
         if (prefs.isPrePrayerEnabled) {
           final offsetMinutes = prefs.prePrayerOffsetMinutes;
-          final prePrayerTime = entry.value.subtract(
+          // Calculate pre-prayer based on the ALIGNED time
+          final prePrayerTime = alignedTime.subtract(
             Duration(minutes: offsetMinutes),
           );
 
@@ -177,6 +192,26 @@ class AdhanSchedulingService {
       final dayVal = date.difference(DateTime(date.year, 1, 1)).inDays + 1;
 
       for (int prayerIndex = 0; prayerIndex < 5; prayerIndex++) {
+        int prePrayerAlarmId = 20000 + (dayVal * 10) + prayerIndex;
+        await scheduler.cancelAdhan(prePrayerAlarmId);
+      }
+    }
+  }
+
+  Future<void> cancelAllAdhans() async {
+    final scheduler = NativeSchedulerService();
+    final now = DateTime.now();
+
+    for (int i = 0; i < 30; i++) {
+      final date = now.add(Duration(days: i));
+      final dayVal = date.difference(DateTime(date.year, 1, 1)).inDays + 1;
+
+      for (int prayerIndex = 0; prayerIndex < 5; prayerIndex++) {
+        // Cancel Adhan
+        int alarmId = 10000 + (dayVal * 10) + prayerIndex;
+        await scheduler.cancelAdhan(alarmId);
+
+        // Cancel Pre-Prayer
         int prePrayerAlarmId = 20000 + (dayVal * 10) + prayerIndex;
         await scheduler.cancelAdhan(prePrayerAlarmId);
       }
